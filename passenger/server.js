@@ -11,6 +11,7 @@ const Passenger = mongoose.model('Passenger',{
     id:Number,
     name:String,
     country: String,
+    
 });
 
 app.get('/passengers', async (req, res) => {
@@ -18,21 +19,21 @@ app.get('/passengers', async (req, res) => {
         const passengers = await Passenger.find();
         res.json(passengers);
     }catch(erorr){
-        res.status(500).json({error:'Error fetching user data'});
+        res.status(500).json({error:'Error fetching user data',message: error.message});
     }
 });
 
 app.get('/passengers/:id',async (req,res)=>{
     try{
-        const passengerId = req.params.id;
-        const passenger = await findById(passengerId);
+        const {id} = req.params;
+        const passenger = await Passenger.findOne({id:parseInt(id)});
         if (passenger){
             res.json(passenger);
         }else{
             res.status(404).json({error: 'Passenger not found'})
         }
     }catch(error){
-        res.status(404).json({error:'Error fetching passenger data'});
+        res.status(404).json({error:error.message});
     }
 });
 
@@ -40,25 +41,25 @@ app.post('/passengers',async (req,res)=>{
     try{
         const passenger = new Passenger (req.body);
         await passenger.save();
-        res.status(201).json(airline);
+        res.status(201).json(passenger);
     }catch(error){
         res.status(500).json({error : 'Error creating passenger'});
     }
 });
 
-app.get('/passengers/flight/:flightId', async (req, res) => {
-    try {
-      const flightId = req.params.flightId;
-      const passengers = await Passenger.find({ flights: flightId });
-      if (passengers.length > 0) {
-        res.json(passengers);
-      } else {
-        res.status(404).json({ error: 'No passengers found for this flight' });
-      }
-    } catch (error) {
-      res.status(500).json({ error: 'Error fetching passengers' });
-    }
-  });
+// app.get('/passengers/flight/:flightId', async (req, res) => {
+//     try {
+//       const flightId = req.params.flightId;
+//       const passengers = await Passenger.find({ flights: flightId });
+//       if (passengers.length > 0) {
+//         res.json(passengers);
+//       } else {
+//         res.status(404).json({ error: 'No passengers found for this flight' });
+//       }
+//     } catch (error) {
+//       res.status(500).json({ error: 'Error fetching passengers' });
+//     }
+//   });
   
 
 app.listen(PORT, () => {

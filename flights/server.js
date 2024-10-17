@@ -12,7 +12,7 @@ function connectWithRetry() {
     host: 'localhost',
     user: 'root',
     password: 'pass@word1',
-    database: 'salesdb'
+    database: 'flightsdb'
   });
 
   connection.connect((err) => {
@@ -49,17 +49,22 @@ function setupRoutes(db) {
  
 app.post('/flights', async (req, res) => {
     const { flightId, airlineId, seats , occupied ,destination, date, departure } = req.body;
-    const sql = 'INSERT INTO FLIGHTS (FLIGHTID, AIRLINEID, SEATS, OCCUPIED, PASSENGERS, DESTINATION, DATE, DEPARTURE ) VALUES (?,?,?,?,?)';
+    const sql = 'INSERT INTO FLIGHTS (FLIGHTID, AIRLINEID, SEATS, OCCUPIED, PASSENGERS, DESTINATION, DEP_DATE, DEPARTURE ) VALUES (?,?,?,?,?,?,?,?)';
     const values = [flightId, airlineId, seats, occupied, JSON.stringify([]), destination, date, departure];
     try{
-        const airlineRes = await axios.get(`http://localhost:3002/airlines/${airlineId}`);
+      console.log('4')
+        const airlineRes = await axios.get(`http://localhost:3002/airlines/get/${airlineId}`);
+        
         if(airlineRes.data){
+          
             const url = `http://localhost:3002/airlines/update`;
-            const data = {flight_id:flightId,airline_id:airlineId};
-            await axios.put(url,dta);
+           
+            const data = {flight_id:flightId,id:airlineId};
+            await axios.put(url,data);
+          
             db.query(sql,values,(err,result)=>{
                 if(err){
-                    res.status(500).json({error: 'Error creating flight data'});
+                    res.status(500).json({error: 'Error creating flight data',message:err.message});
                 }else{
                     res.status(201).json({message : 'Flight data entered successfully',id: result.insertId});
                 }
@@ -68,7 +73,7 @@ app.post('/flights', async (req, res) => {
             res.status(400).json({error:'Ivalid airline id'});
         }
     }catch(error){
-        res.status(500).json({error: 'Error processing flight'});
+        res.status(500).json({error: 'Error processing flight',message:error.message});
     }
 });
 

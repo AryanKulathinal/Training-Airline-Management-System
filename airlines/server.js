@@ -27,8 +27,8 @@ app.get('/airlines',async (req,res)=>{
 
 app.get('/airlines/get/:id',async (req,res)=>{
     try{
-        const airlineId=req.params.id;
-        const airline =await Airline.findOne({airlineId});
+        const {id}=req.params;
+        const airline =await Airline.findOne({id:parseInt(id)});
         if(airline){
             res.json(airline);
         }else{
@@ -52,10 +52,10 @@ app.post('/airlines', async (req, res) => {
 
 app.put('/airlines/update',async (req,res)=>{
     try{
-        const { flight_id, airline_id} =req.body;
+        const { flight_id, id} =req.body;
         await Airline.findOneAndUpdate(
-            { airlineId: airline_id },
-            { $addToSet: { flights: flight_id } },);
+            { id: parseInt(id) },
+            { $addToSet: { flights: parseInt(flight_id) } },);
         res.status(200).json({
             message: "Airline data updated successfully",
         });
